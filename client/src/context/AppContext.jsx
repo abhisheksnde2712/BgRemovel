@@ -14,12 +14,10 @@ const AppContextProvider = (props) => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
 
-  // Axios defaults for CORS & credentials
+  // ✅ Axios setup (TOKEN based auth)
   axios.defaults.baseURL = backendUrl;
-  axios.defaults.withCredentials = true; // important for cookies
   axios.defaults.headers.common["token"] = token || "";
 
-  // Load user's credits and data
   const loadCreditsData = async () => {
     try {
       const { data } = await axios.get("/api/user/credits");
@@ -28,12 +26,10 @@ const AppContextProvider = (props) => {
         setUser(data.user);
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.response?.data?.message || error.message);
     }
   };
 
-  // Generate image
   const generateImage = async (prompt) => {
     try {
       const { data } = await axios.post("/api/image/generate-image", { prompt });
@@ -51,7 +47,6 @@ const AppContextProvider = (props) => {
     }
   };
 
-  // Logout
   const logout = () => {
     localStorage.removeItem("token");
     setToken("");
@@ -62,22 +57,26 @@ const AppContextProvider = (props) => {
     if (token) loadCreditsData();
   }, [token]);
 
-  const value = {
-    token,
-    setToken,
-    user,
-    setUser,
-    showLogin,
-    setShowLogin,
-    credit,
-    setCredit,
-    loadCreditsData,
-    backendUrl,
-    generateImage,
-    logout,
-  };
-
-  return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider
+      value={{
+        token,
+        setToken,
+        user,
+        setUser,
+        showLogin,
+        setShowLogin,
+        credit,
+        setCredit,
+        loadCreditsData,
+        backendUrl,
+        generateImage,
+        logout,
+      }}
+    >
+      {props.children}
+    </AppContext.Provider>
+  );
 };
 
 export default AppContextProvider;
