@@ -12,7 +12,16 @@ await connectDB()
 
 // Intialize Middlewares
 app.use(express.json())
-app.use(cors())
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://bg-removel-p6oc.vercel.app",
+    ],
+    credentials: true, // REQUIRED for cookies
+  })
+);
+
 
 // API routes
 app.use('/api/user',userRouter)
