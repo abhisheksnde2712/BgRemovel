@@ -5,43 +5,50 @@ import userRouter from './routes/userRoutes.js';
 import connectDB from './configs/mongodb.js';
 import imageRouter from './routes/imageRoutes.js';
 
-// App Config
 const PORT = process.env.PORT || 4000;
 const app = express();
 await connectDB();
 
-// Allowed frontend origins
 const allowedOrigins = [
-  'http://localhost:5173', // local dev
-  'https://bg-removel-p6oc.vercel.app' // your Vercel frontend
+  'http://localhost:5173',
+  'https://bg-removel-p6oc.vercel.app',
 ];
 
-// CORS setup
+// 🔥 MUST BE FIRST
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept, Authorization, token'
+  );
+  res.header(
+    'Access-Control-Allow-Methods',
+    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
+  );
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200); // ✅ VERY IMPORTANT
+  }
+  next();
+});
+
+// CORS middleware
 app.use(
   cors({
-    origin: function (origin, callback) {
-      if (!origin) return callback(null, true); // allow Postman or server requests
-      if (allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('CORS not allowed'));
-      }
-    },
-    credentials: true, // allow cookies
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+    origin: allowedOrigins,
+    credentials: true,
   })
 );
 
-// Handle preflight requests
-app.options('*', cors());
-
 app.use(express.json());
 
-// API routes
+// Routes
 app.use('/api/user', userRouter);
 app.use('/api/image', imageRouter);
 
 app.get('/', (req, res) => res.send('API Working'));
 
-app.listen(PORT, () => console.log('Server running on port ' + PORT));
+app.listen(PORT, () =>
+  console.log(`Server running on port ${PORT}`)
+);
