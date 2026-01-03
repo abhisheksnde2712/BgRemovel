@@ -29,7 +29,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'token'],
 }));
 
-// 🔥 VERY IMPORTANT (preflight)
+// VERY IMPORTANT (preflight)
 app.options('*', cors());
 
 app.use(express.json());
