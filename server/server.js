@@ -10,42 +10,28 @@ const PORT = process.env.PORT || 4000;
 
 await connectDB();
 
-/* =======================
-   CORS CONFIG (FINAL)
-======================= */
 const allowedOrigins = [
   'http://localhost:5173',
   'https://bg-removel-p6oc.vercel.app',
 ];
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'token'],
+}));
 
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
+// 🔥 VERY IMPORTANT (preflight)
+app.options('*', cors());
 
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization, token'
-  );
-
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-  );
-
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-
-  // 🔥 IMPORTANT: Handle preflight
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
-
-// Body parser AFTER CORS
 app.use(express.json());
 
 // Routes
@@ -54,6 +40,6 @@ app.use('/api/image', imageRouter);
 
 app.get('/', (req, res) => res.send('API Working'));
 
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log('Server running on port ' + PORT);
+});
